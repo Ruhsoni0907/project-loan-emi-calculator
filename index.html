@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMI Calculator — Loan Planner</title>
+  <meta name="description" content="Professional loan EMI calculator with amortization schedules, comparison mode, and PDF export.">
+  <!-- Open Graph — enables rich previews on WhatsApp, Twitter, Slack, LinkedIn -->
+  <meta property="og:title" content="EMI Calculator — Professional Loan Planner">
+  <meta property="og:description" content="Calculate your loan EMI instantly. Compare scenarios, view amortization schedules, and export results. Free and no sign-up required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ruhsoni0907.github.io/loan-emi-calculator/">
+  <meta property="og:image" content="https://ruhsoni0907.github.io/loan-emi-calculator/public/og-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="EMI Calculator — Professional Loan Planner">
+  <meta name="twitter:description" content="Calculate your loan EMI instantly. Compare scenarios, view amortization schedules, and export results.">
+  <link rel="canonical" href="https://ruhsoni0907.github.io/loan-emi-calculator/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236366F1'/><text x='16' y='23' text-anchor='middle' font-family='system-ui' font-weight='700' font-size='18' fill='white'>₹</text></svg>">
+</head>
+<body>
+  <!-- Gradient mesh background -->
+  <div class="bg-mesh" aria-hidden="true">
+    <div class="bg-noise"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+  </div>
+
+  <!-- Skip link for accessibility -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Toast container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Keyboard shortcuts modal -->
+  <div id="shortcuts-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" hidden>
+    <div class="modal-content glass-surface">
+      <div class="modal-header">
+        <h3>Keyboard Shortcuts</h3>
+        <button class="btn-icon" onclick="toggleShortcutsModal()" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>K</kbd><span>Share link</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>S</kbd><span>Save scenario</span></div>
+        <div class="shortcut-item"><kbd>Ctrl</kbd>+<kbd>P</kbd><span>Print report</span></div>
+        <div class="shortcut-item"><kbd>Esc</kbd><span>Close modal</span></div>
+        <div class="shortcut-item"><kbd>←</kbd><kbd>→</kbd><span>Nudge focused slider</span></div>
+        <div class="shortcut-item"><kbd>?</kbd><span>Show shortcuts</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header" role="banner">
+    <div class="header-inner container">
+      <div class="header-brand">
+        <div class="logo-mark">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="header-title">EMI Calculator</h1>
+          <p class="header-subtitle">Professional Loan Planner</p>
+        </div>
+      </div>
+      <nav class="header-nav" aria-label="Main navigation">
+        <div class="segment-control" role="tablist" aria-label="View mode">
+          <button class="segment-btn active" role="tab" aria-selected="true" data-mode="calculator" onclick="switchMode('calculator')">Calculator</button>
+          <button class="segment-btn" role="tab" aria-selected="false" data-mode="compare" onclick="switchMode('compare')">Compare</button>
+        </div>
+        <button class="btn-icon" onclick="handleShare()" title="Share (Ctrl+K)" aria-label="Share calculation">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+        </button>
+        <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <button class="btn-icon" onclick="toggleShortcutsModal()" title="Keyboard shortcuts (?)" aria-label="Show keyboard shortcuts">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main id="main" class="main container">
+    <!-- Calculator mode -->
+    <div id="mode-calculator" class="calculator-layout">
+      <!-- Left column: inputs -->
+      <aside class="input-column" role="form" aria-label="Loan parameters">
+        <div class="card card-elevated">
+          <div class="card-header">
+            <div class="card-header-bar"></div>
+            <h2 class="card-title">Loan Details</h2>
+            <button class="btn-ghost btn-sm" onclick="handleReset()" title="Reset calculator (Ctrl+R)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Reset
+            </button>
+          </div>
+
+          <!-- Presets -->
+          <div class="presets-section">
+            <label class="input-label">Quick Start</label>
+            <div class="presets-grid" role="radiogroup" aria-label="Loan presets">
+              <button class="preset-btn" data-preset="home" onclick="applyPreset('home')">
+                <span class="preset-icon">
+                  <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="roofGrad" x1="32" y1="4" x2="32" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#E8453C"/><stop offset="1" stop-color="#C62828"/>
+                      </linearGradient>
+                      <linearGradient id="wallGrad" x1="16" y1="26" x2="48" y2="58" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFF8E1"/><stop offset="1" stop-color="#FFE0B2"/>
+                      </linearGradient>
+                      <linearGradient id="doorGrad" x1="28" y1="36" x2="36" y2="58" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#5D4037"/><stop offset="1" stop-color="#3E2723"/>
+                      </linearGradient>
+                      <filter id="houseShadow"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.2"/></filter>
+                    </defs>
+                    <g filter="url(#houseShadow)">
+                      <polygon points="32,6 4,28 16,28 16,56 48,56 48,28 60,28" fill="url(#wallGrad)" stroke="#E0C8A0" stroke-width="0.5"/>
+                      <polygon points="32,4 2,30 16,30 16,28 48,28 48,30 62,30" fill="url(#roofGrad)"/>
+                      <rect x="28" y="38" width="8" height="18" rx="1" fill="url(#doorGrad)"/>
+                      <circle cx="34" cy="48" r="1" fill="#FFD54F"/>
+                      <rect x="12" y="34" width="8" height="7" rx="1" fill="#90CAF9" opacity="0.7"/>
+                      <line x1="16" y1="34" x2="16" y2="41" stroke="#BBDEFB" stroke-width="0.7"/>
+                      <line x1="12" y1="37.5" x2="20" y2="37.5" stroke="#BBDEFB" stroke-width="0.7"/>
+                      <rect x="44" y="34" width="8" height="7" rx="1" fill="#90CAF9" opacity="0.7"/>
+                      <line x1="48" y1="34" x2="48" y2="41" stroke="#BBDEFB" stroke-width="0.7"/>
+                      <line x1="44" y1="37.5" x2="52" y2="37.5" stroke="#BBDEFB" stroke-width="0.7"/>
+                      <rect x="16" y="54" width="32" height="4" rx="0.5" fill="#8D6E63"/>
+                      <polygon points="32,4 0,32 64,32" fill="none" stroke="#B71C1C" stroke-width="1" opacity="0.3"/>
+                    </g>
+                  </svg>
+                </span><span class="preset-name">Home</span>
+              </button>
+              <button class="preset-btn" data-preset="car" onclick="applyPreset('car')">
+                <span class="preset-icon">
+                  <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="carBody" x1="8" y1="24" x2="56" y2="48" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#EF5350"/><stop offset="1" stop-color="#C62828"/>
+                      </linearGradient>
+                      <linearGradient id="carTop" x1="18" y1="16" x2="46" y2="30" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#EF9A9A"/><stop offset="1" stop-color="#E53935"/>
+                      </linearGradient>
+                      <linearGradient id="glassGrad" x1="20" y1="18" x2="44" y2="28" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#E3F2FD" stop-opacity="0.9"/><stop offset="1" stop-color="#90CAF9" stop-opacity="0.6"/>
+                      </linearGradient>
+                      <linearGradient id="wheelGrad" x1="17" y1="42" x2="23" y2="50" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#424242"/><stop offset="1" stop-color="#212121"/>
+                      </linearGradient>
+                      <filter id="carShadow"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-opacity="0.25"/></filter>
+                    </defs>
+                    <g filter="url(#carShadow)">
+                      <rect x="6" y="28" width="52" height="16" rx="4" fill="url(#carBody)"/>
+                      <path d="M18,28 L24,16 L40,16 L46,28" fill="url(#carTop)"/>
+                      <path d="M25,17 L40,17 L45,28 L20,28 Z" fill="url(#glassGrad)"/>
+                      <line x1="32" y1="17" x2="32" y2="28" stroke="#BBDEFB" stroke-width="0.8"/>
+                      <rect x="4" y="32" width="8" height="4" rx="2" fill="#FFEE58"/>
+                      <rect x="52" y="32" width="8" height="4" rx="2" fill="#FFEE58"/>
+                      <rect x="8" y="40" width="12" height="3" rx="1" fill="#EF5350" opacity="0.5"/>
+                      <circle cx="19" cy="46" r="7" fill="url(#wheelGrad)"/>
+                      <circle cx="19" cy="46" r="3.5" fill="#616161"/>
+                      <circle cx="19" cy="46" r="1.5" fill="#9E9E9E"/>
+                      <circle cx="45" cy="46" r="7" fill="url(#wheelGrad)"/>
+                      <circle cx="45" cy="46" r="3.5" fill="#616161"/>
+                      <circle cx="45" cy="46" r="1.5" fill="#9E9E9E"/>
+                      <rect x="22" y="34" width="20" height="1.5" rx="0.75" fill="#BDBDBD" opacity="0.4"/>
+                    </g>
+                  </svg>
+                </span><span class="preset-name">Car</span>
+              </button>
+              <button class="preset-btn" data-preset="edu" onclick="applyPreset('edu')">
+                <span class="preset-icon">
+                  <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="capGrad" x1="32" y1="10" x2="32" y2="30" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#37474F"/><stop offset="1" stop-color="#1A237E"/>
+                      </linearGradient>
+                      <linearGradient id="tasselGrad" x1="52" y1="14" x2="52" y2="34" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFB300"/><stop offset="1" stop-color="#FF8F00"/>
+                      </linearGradient>
+                      <linearGradient id="scrollGrad" x1="22" y1="32" x2="42" y2="52" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFF8E1"/><stop offset="1" stop-color="#FFE082"/>
+                      </linearGradient>
+                      <filter id="eduShadow"><feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-opacity="0.2"/></filter>
+                    </defs>
+                    <g filter="url(#eduShadow)">
+                      <polygon points="32,12 4,26 32,38 60,26" fill="url(#capGrad)"/>
+                      <polygon points="32,12 4,26 32,20 60,26" fill="#263238" opacity="0.3"/>
+                      <line x1="52" y1="16" x2="52" y2="36" stroke="url(#tasselGrad)" stroke-width="2.5" stroke-linecap="round"/>
+                      <circle cx="52" cy="38" r="2.5" fill="#FFB300"/>
+                      <path d="M20,30 L20,46 C20,46 32,52 44,46 L44,30 L32,36 Z" fill="url(#scrollGrad)" stroke="#FFE082" stroke-width="0.5"/>
+                      <path d="M20,30 L32,36 L44,30" fill="none" stroke="#D4A030" stroke-width="0.8"/>
+                      <line x1="32" y1="36" x2="32" y2="50" stroke="#D4A030" stroke-width="0.6"/>
+                    </g>
+                  </svg>
+                </span><span class="preset-name">Education</span>
+              </button>
+              <button class="preset-btn" data-preset="personal" onclick="applyPreset('personal')">
+                <span class="preset-icon">
+                  <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="bagGrad" x1="18" y1="16" x2="46" y2="54" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFD54F"/><stop offset="1" stop-color="#F9A825"/>
+                      </linearGradient>
+                      <linearGradient id="bagDark" x1="20" y1="20" x2="44" y2="50" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFB300"/><stop offset="1" stop-color="#E65100"/>
+                      </linearGradient>
+                      <linearGradient id="dollarGrad" x1="28" y1="28" x2="36" y2="44" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFF8E1"/><stop offset="1" stop-color="#FFE082"/>
+                      </linearGradient>
+                      <filter id="bagShadow"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.25"/></filter>
+                    </defs>
+                    <g filter="url(#bagShadow)">
+                      <ellipse cx="32" cy="52" rx="16" ry="6" fill="#E65100" opacity="0.3"/>
+                      <path d="M18,22 C18,20 20,18 24,18 L24,14 C24,12 26,10 28,10 L36,10 C38,10 40,12 40,14 L40,18 C44,18 46,20 46,22 L46,50 C46,52 44,54 42,54 L22,54 C20,54 18,52 18,50 Z" fill="url(#bagGrad)"/>
+                      <path d="M18,22 C18,20 20,18 24,18 L24,14 C24,12 26,10 28,10 L36,10 C38,10 40,12 40,14 L40,18 C44,18 46,20 46,22 L46,30 L18,30 Z" fill="url(#bagDark)" opacity="0.3"/>
+                      <rect x="26" y="6" width="12" height="10" rx="6" fill="none" stroke="#E6A817" stroke-width="3"/>
+                      <text x="32" y="40" text-anchor="middle" font-size="16" font-weight="bold" fill="url(#dollarGrad)" font-family="Arial">$</text>
+                      <ellipse cx="32" cy="22" rx="14" ry="4" fill="none" stroke="#E6A817" stroke-width="1" opacity="0.4"/>
+                    </g>
+                  </svg>
+                </span><span class="preset-name">Personal</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Loan Amount -->
+          <div class="field-group" id="field-principal">
+            <div class="field-header">
+              <label class="input-label" for="principal">Loan Amount</label>
+              <span class="field-value accent" id="principal-display">₹10,00,000</span>
+            </div>
+            <div class="amount-input">
+              <button class="stepper-btn" onmousedown="startStepper('principal',-1)" onmouseup="stopStepper()" onmouseleave="stopStepper()" aria-label="Decrease amount">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <div class="input-wrapper">
+                <span class="input-prefix">₹</span>
+                <input type="number" id="principal" class="number-input" value="1000000" min="10000" max="100000000" step="10000" aria-label="Loan amount">
+              </div>
+              <button class="stepper-btn" onmousedown="startStepper('principal',1)" onmouseup="stopStepper()" onmouseleave="stopStepper()" aria-label="Increase amount">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <input type="range" id="principal-slider" class="slider" min="10000" max="100000000" step="10000" value="1000000">
+            <div class="slider-labels"><span>₹10K</span><span>₹10Cr</span></div>
+            <div class="field-error" id="principal-error" role="alert"></div>
+          </div>
+
+          <!-- Interest Rate -->
+          <div class="field-group" id="field-rate">
+            <div class="field-header">
+              <label class="input-label" for="rate">Interest Rate <span class="label-sub">per annum</span></label>
+              <span class="field-value accent" id="rate-display">8.5%</span>
+            </div>
+            <div class="amount-input">
+              <button class="stepper-btn" onmousedown="startStepper('rate',-0.1)" onmouseup="stopStepper()" onmouseleave="stopStepper()" aria-label="Decrease rate">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <div class="input-wrapper">
+                <input type="number" id="rate" class="number-input" value="8.5" min="0.1" max="50" step="0.1" aria-label="Interest rate">
+                <span class="input-suffix">%</span>
+              </div>
+              <button class="stepper-btn" onmousedown="startStepper('rate',0.1)" onmouseup="stopStepper()" onmouseleave="stopStepper()" aria-label="Increase rate">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <input type="range" id="rate-slider" class="slider" min="0.1" max="50" step="0.1" value="8.5">
+            <div class="slider-labels"><span>0.1%</span><span>50%</span></div>
+            <div class="field-error" id="rate-error" role="alert"></div>
+          </div>
+
+          <!-- Tenure -->
+          <div class="field-group" id="field-tenure">
+            <div class="field-header">
+              <label class="input-label" for="tenure">Tenure</label>
+              <span class="field-value accent" id="tenure-display">10 yr</span>
+            </div>
+            <div class="segment-control tenure-mode" role="radiogroup" aria-label="Tenure unit">
+              <div class="segment-indicator" id="tenure-indicator"></div>
+              <button class="segment-btn small active" role="radio" aria-checked="true" data-tenure="years" onclick="setTenureMode('years')">Years</button>
+              <button class="segment-btn small" role="radio" aria-checked="false" data-tenure="months" onclick="setTenureMode('months')">Months</button>
+            </div>
+            <div class="amount-input">
+              <button class="stepper-btn" onmousedown="startStepper('tenure',-1)" onmouseup="stopStepper()" onmouseleave="stopStepper()" aria-label="Decrease tenure">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <div class="input-wrapper">
+                <input type="number" id="tenure" class="number-input" value="10" min="1" max="30" step="1" aria-label="Tenure">
+                <span class="input-suffix" id="tenure-unit">yr</span>
+              </div>
+              <button class="stepper-btn" onmousedown="startStepper('tenure',1)" onmouseup="stopStepper()" onmouseleave="stopStepper()" aria-label="Increase tenure">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+            </div>
+            <input type="range" id="tenure-slider" class="slider" min="1" max="30" step="1" value="10">
+            <div class="slider-labels"><span>1 yr</span><span>30 yr</span></div>
+            <div class="field-error" id="tenure-error" role="alert"></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Payment Frequency -->
+          <div class="field-group">
+            <label class="input-label">Payment Frequency</label>
+            <div class="segment-control frequency-control" role="radiogroup" aria-label="Payment frequency">
+              <div class="segment-indicator" id="freq-indicator"></div>
+              <button class="segment-btn small active" role="radio" aria-checked="true" data-freq="monthly" onclick="setFrequency('monthly')">Monthly</button>
+              <button class="segment-btn small" role="radio" aria-checked="false" data-freq="quarterly" onclick="setFrequency('quarterly')">Quarterly</button>
+              <button class="segment-btn small" role="radio" aria-checked="false" data-freq="half-yearly" onclick="setFrequency('half-yearly')">Half-Yearly</button>
+            </div>
+          </div>
+
+          <!-- Processing Fee -->
+          <div class="field-group" id="field-fee">
+            <div class="field-header">
+              <label class="input-label" for="fee">Processing Fee <span class="label-sub">+ 18% GST</span></label>
+              <span class="field-value" id="fee-display">1.0%</span>
+            </div>
+            <input type="range" id="fee-slider" class="slider" min="0" max="5" step="0.1" value="1">
+            <div class="slider-labels"><span>0%</span><span>5%</span></div>
+          </div>
+
+          <!-- Down Payment -->
+          <div class="field-group" id="field-downpayment">
+            <div class="field-header">
+              <label class="input-label" for="downpayment">Down Payment</label>
+              <span class="field-value" id="downpayment-display">₹0</span>
+            </div>
+            <input type="range" id="downpayment-slider" class="slider" min="0" max="500000" step="10000" value="0">
+            <div class="slider-labels"><span>₹0</span><span id="dp-max-label">₹5L</span></div>
+          </div>
+
+          <!-- Extra Payment -->
+          <div class="field-group" id="field-extrapayment">
+            <div class="field-header">
+              <label class="input-label" for="extrapayment">Extra Monthly Payment <span class="label-sub">over EMI</span></label>
+              <span class="field-value" id="extrapayment-display">₹0</span>
+            </div>
+            <input type="range" id="extrapayment-slider" class="slider" min="0" max="100000" step="1000" value="0">
+            <div class="slider-labels"><span>₹0</span><span>₹1L</span></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right column: results -->
+      <section class="result-column" aria-label="Calculation results">
+        <!-- EMI Hero -->
+        <div class="emi-hero" id="emi-hero">
+          <p class="emi-hero-label" id="emi-hero-label">Monthly EMI</p>
+          <p class="emi-hero-value" id="emi-value" aria-live="polite" aria-atomic="true">₹0</p>
+          <p class="emi-hero-sub" id="emi-sub">—</p>
+          <div class="emi-hero-metrics" id="emi-metrics"></div>
+        </div>
+
+        <!-- Dashboard cards -->
+        <div class="dashboard-grid" id="dashboard-cards"></div>
+
+        <!-- Charts -->
+        <div class="card card-elevated" id="charts-section">
+          <div class="card-header">
+            <div class="card-header-bar" style="background: var(--accent)"></div>
+            <h3 class="card-title">Visualizations</h3>
+            <div class="segment-control chart-toggle" role="tablist" aria-label="Chart type">
+              <button class="segment-btn small active" role="tab" data-chart="doughnut" onclick="switchChart('doughnut')">Split</button>
+              <button class="segment-btn small" role="tab" data-chart="balance" onclick="switchChart('balance')">Balance</button>
+              <button class="segment-btn small" role="tab" data-chart="timeline" onclick="switchChart('timeline')">Timeline</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <div id="chart-doughnut" class="chart-panel active">
+              <div class="chart-center-label" id="chart-center-label"></div>
+              <canvas id="canvas-doughnut"></canvas>
+            </div>
+            <div id="chart-balance" class="chart-panel">
+              <canvas id="canvas-balance"></canvas>
+            </div>
+            <div id="chart-timeline" class="chart-panel">
+              <canvas id="canvas-timeline"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amortization table -->
+        <div class="card card-elevated" id="table-section">
+          <div class="card-header">
+            <div class="card-header-bar" style="background: var(--success)"></div>
+            <h3 class="card-title">Amortization Schedule</h3>
+            <div class="table-controls">
+              <div class="segment-control table-view-toggle" role="tablist">
+                <button class="segment-btn small active" data-view="yearly" onclick="switchTableView('yearly')">Yearly</button>
+                <button class="segment-btn small" data-view="monthly" onclick="switchTableView('monthly')">Monthly</button>
+              </div>
+              <input type="text" id="table-search" class="search-input" placeholder="Search..." aria-label="Search schedule">
+              <div class="dropdown">
+                <button class="btn-ghost btn-sm" onclick="toggleDropdown('export-menu')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                  Export
+                </button>
+                <div id="export-menu" class="dropdown-menu" hidden>
+                  <button onclick="exportCSV()">CSV</button>
+                  <button onclick="exportPDF()">PDF</button>
+                  <button onclick="printReport()">Print</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrapper" id="table-wrapper">
+            <table class="data-table" id="amortization-table">
+              <thead>
+                <tr id="table-head"></tr>
+              </thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+          <div class="table-footer">
+            <span id="table-info" class="table-info"></span>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="handleSaveScenario()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Scenario
+          </button>
+          <button class="btn btn-primary" onclick="handleCopyResults()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy Results
+          </button>
+          <button class="btn btn-primary" onclick="printReport()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Compare mode -->
+    <div id="mode-compare" class="compare-layout" hidden>
+      <div class="compare-header">
+        <h2 class="section-title">Loan Comparison</h2>
+        <p class="section-subtitle">Configure 2–3 scenarios side by side. Auto-saved to your browser.</p>
+      </div>
+      <div id="compare-cards" class="compare-grid"></div>
+      <div id="compare-insights" class="card card-elevated"></div>
+      <div id="compare-chart" class="card card-elevated">
+        <div class="card-header">
+          <div class="card-header-bar" style="background: var(--accent)"></div>
+          <h3 class="card-title">Cost Comparison</h3>
+        </div>
+        <div class="compare-bars" id="compare-bars"></div>
+      </div>
+      <div class="compare-actions">
+        <button class="btn btn-ghost" onclick="resetScenarios()">Reset Scenarios</button>
+      </div>
+    </div>
+
+    <!-- Saved scenarios panel -->
+    <div id="saved-panel" class="card card-elevated saved-panel" hidden>
+      <div class="card-header">
+        <div class="card-header-bar" style="background: var(--warning)"></div>
+        <h3 class="card-title">Saved Scenarios</h3>
+        <button class="btn-icon" onclick="toggleSavedPanel()" aria-label="Close saved scenarios">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="saved-list" class="saved-list"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-formula">
+        <span class="footer-label">EMI Formula</span>
+        <code class="formula-code">EMI = [P × R × (1+R)<sup>N</sup>] / [(1+R)<sup>N</sup> − 1]</code>
+      </div>
+      <div class="footer-links">
+        <button class="btn-ghost btn-sm" onclick="toggleSavedPanel()">Saved Scenarios</button>
+        <span class="footer-shortcuts">Ctrl+K Share · Ctrl+S Save · ? Shortcuts</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="script.js?v=3"></script>
+</body>
+</html>
